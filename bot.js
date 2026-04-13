@@ -192,7 +192,7 @@ async function pollMessages() {
       }
 
       // 명령어
-      if (text === '/status') {
+      if (text === '/status' || text === 'status') {
         const { data, today } = getTodayRecord();
         let statusMsg = `📊 *${today} 현황*\n`;
         for (const member of MEMBERS) {
@@ -203,7 +203,7 @@ async function pollMessages() {
         await sendMessage(statusMsg);
       }
 
-      if (text === '/streak') {
+      if (text === '/streak' || text === 'streak') {
         let streakMsg = '🔥 *스트릭 현황*\n';
         for (const member of MEMBERS) {
           const streak = calculateStreak(member.id);
