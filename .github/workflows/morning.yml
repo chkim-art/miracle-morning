@@ -1,4 +1,4 @@
-name: Miracle Morning Bot
+name: "Miracle Morning Bot"
 
 on:
   schedule:
