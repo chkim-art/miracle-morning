@@ -187,7 +187,12 @@
 </div>
 
 <script>
-const API = 'http://localhost:3737';
+// GitHub Pages에서는 같은 리포의 data/ 폴더에서 읽음
+// 로컬 봇 실행 시에는 localhost:3737 API에서 읽음
+const REPO_BASE = location.hostname.includes('github.io')
+  ? '' // GitHub Pages: 상대경로
+  : 'http://localhost:3737'; // 로컬: 봇 API
+const USE_API = REPO_BASE.includes('localhost');
 let allData = null;
 let members = [];
 let calYear, calMonth, calMember;
@@ -215,10 +220,30 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ─── 데이터 로드 ───
 async function loadData() {
   try {
-    const res = await fetch(API + '/api/data');
-    const json = await res.json();
-    allData = json.records;
-    members = json.members;
+    if (USE_API) {
+      // 로컬 봇 API
+      const res = await fetch(REPO_BASE + '/api/data');
+      const json = await res.json();
+      allData = json.records;
+      members = json.members;
+    } else {
+      // GitHub Pages: data/ 폴더에서 직접 JSON 로드
+      members = [
+        { id: 'jjpark', name: 'JJ박', targetTime: '05:30' },
+        { id: 'rian', name: '리안', targetTime: '07:00' }
+      ];
+      allData = {};
+      // 최근 3개월 데이터 로드
+      const now = new Date();
+      for (let i = 0; i < 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        try {
+          const res = await fetch(`data/${key}.json`);
+          if (res.ok) Object.assign(allData, await res.json());
+        } catch {}
+      }
+    }
     document.getElementById('offlineBanner').style.display = 'none';
     renderAll();
   } catch {

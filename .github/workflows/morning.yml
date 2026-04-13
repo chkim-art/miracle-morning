@@ -2,11 +2,10 @@ name: "Miracle Morning Bot"
 
 on:
   schedule:
-    # KST = UTC+9 → UTC 변환
-    - cron: '20 20 * * *'   # 05:20 KST → JJ박 코드 발송
-    - cron: '50 21 * * *'   # 06:50 KST → 리안 코드 발송
-    - cron: '*/5 20-23 * * *'  # 05:00~08:55 KST → 5분마다 메시지 확인
-    - cron: '*/5 0 * * *'      # 09:00~09:55 KST → 마감 체크용 추가
+    - cron: '20 20 * * *'         # 05:20 KST → JJ박 코드 발송
+    - cron: '50 21 * * *'         # 06:50 KST → 리안 코드 발송
+    - cron: '*/5 20-23 * * *'     # 05:00~08:55 KST → 5분마다 체크
+    - cron: '*/5 0 * * *'         # 09:00~09:55 KST → 마감 체크
   workflow_dispatch:
     inputs:
       action:
@@ -18,6 +17,9 @@ on:
           - send-jjpark
           - send-rian
           - check
+
+permissions:
+  contents: write
 
 jobs:
   bot:
@@ -32,26 +34,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # data/ 폴더 복원 (이전 실행 데이터)
-      - name: Restore data
-        uses: actions/cache/restore@v4
-        with:
-          path: data/
-          key: miracle-data-${{ github.run_number }}
-          restore-keys: miracle-data-
-
-      # 어떤 작업을 실행할지 결정
       - name: Determine action
         id: action
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
           else
-            # cron 시간 기반 판단 (UTC)
             HOUR=$(date -u +%H)
             MIN=$(date -u +%M)
             echo "Current UTC: ${HOUR}:${MIN}"
-
             if [ "$HOUR" = "20" ] && [ "$MIN" -ge 18 ] && [ "$MIN" -le 22 ]; then
               echo "action=send-jjpark" >> $GITHUB_OUTPUT
             elif [ "$HOUR" = "21" ] && [ "$MIN" -ge 48 ] && [ "$MIN" -le 52 ]; then
@@ -82,9 +73,11 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
 
-      # data/ 폴더 저장
-      - name: Save data
-        uses: actions/cache/save@v4
-        with:
-          path: data/
-          key: miracle-data-${{ github.run_number }}
+      # data/ 변경사항을 리포에 커밋 (GitHub Pages에서 읽을 수 있도록)
+      - name: Commit data
+        run: |
+          git config user.name "miracle-bot"
+          git config user.email "bot@miracle-morning"
+          git add data/ || true
+          git diff --staged --quiet || git commit -m "bot: update data $(date -u +%Y-%m-%dT%H:%M)"
+          git push || true
