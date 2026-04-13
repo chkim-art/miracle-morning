@@ -10,8 +10,8 @@ const DATA_DIR = path.join(__dirname, 'data');
 const OFFSET_FILE = path.join(DATA_DIR, 'last_offset.txt');
 
 const MEMBERS = [
-  { id: 'jjpark', name: 'JJ박', codeTime: '05:20', reminderTime: '05:40', deadline: '06:30' },
-  { id: 'rian', name: '리안', codeTime: '06:50', reminderTime: '07:10', deadline: '08:00' }
+  { id: 'jjpark', name: 'JJ박', codeTime: '05:20', reminderTime: '05:30', deadline: '05:40' },
+  { id: 'rian', name: '리안', codeTime: '06:50', reminderTime: '07:00', deadline: '07:10' }
 ];
 
 function todayStr() {

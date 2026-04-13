@@ -4,8 +4,7 @@ on:
   schedule:
     - cron: '20 20 * * *'         # 05:20 KST → JJ박 코드 발송
     - cron: '50 21 * * *'         # 06:50 KST → 리안 코드 발송
-    - cron: '*/5 20-23 * * *'     # 05:00~08:55 KST → 5분마다 체크
-    - cron: '*/5 0 * * *'         # 09:00~09:55 KST → 마감 체크
+    - cron: '*/5 20-22 * * *'     # 05:00~07:55 KST → 5분마다 체크
   workflow_dispatch:
     inputs:
       action:
