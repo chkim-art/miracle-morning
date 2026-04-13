@@ -1,0 +1,15 @@
+{
+  "name": "miracle-morning-bot",
+  "version": "1.0.0",
+  "description": "미라클모닝 기상인증 텔레그램 봇",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "send-code": "node send-code.js",
+    "check-results": "node check-results.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "node-cron": "^3.0.3"
+  }
+}

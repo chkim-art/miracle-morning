@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미라클모닝</title>
+<style>
+  :root {
+    --bg: #0b0e1a;
+    --surface: #141828;
+    --surface2: #1e2438;
+    --accent: #5b8dee;
+    --accent2: #a78bfa;
+    --success: #34d399;
+    --fail: #f87171;
+    --late: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #2a3250;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Malgun Gothic', -apple-system, sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 32px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, #fff8 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 5%, #fff6 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 50% 25%, #fffb 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, #fff5 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 20%, #fff8 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; width: 100%; max-width: 480px; }
+
+  header { text-align: center; padding: 32px 0 12px; }
+  header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent2); }
+  header .subtitle { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .clock { text-align: center; font-size: 2.6rem; font-weight: 700; color: var(--text); margin: 8px 0 4px; font-variant-numeric: tabular-nums; }
+  .date-label { text-align: center; font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; }
+
+  /* 탭 */
+  .tabs { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: var(--muted); font-size: 0.82rem; border-radius: 9px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .tab-btn.active { background: var(--surface2); color: var(--text); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* 카드 */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+
+  /* 오늘 현황 */
+  .today-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .today-row:last-child { border-bottom: none; }
+  .today-icon { font-size: 1.6rem; }
+  .today-info { flex: 1; }
+  .today-name { font-weight: 600; font-size: 0.95rem; }
+  .today-detail { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .today-status { font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+  .status-success { background: #34d39920; color: var(--success); }
+  .status-late { background: #fbbf2420; color: var(--late); }
+  .status-fail { background: #f8717120; color: var(--fail); }
+  .status-pending { background: #5b8dee20; color: var(--accent); }
+
+  /* 스트릭 */
+  .streak-box { display: flex; gap: 16px; }
+  .streak-item { flex: 1; text-align: center; padding: 16px 8px; background: var(--surface2); border-radius: 12px; }
+  .streak-fire { font-size: 1.8rem; }
+  .streak-num { font-size: 2rem; font-weight: 700; margin: 4px 0; }
+  .streak-label { font-size: 0.7rem; color: var(--muted); }
+
+  /* 달성률 */
+  .rate-box { display: flex; gap: 16px; }
+  .rate-item { flex: 1; text-align: center; }
+  .rate-bar-bg { width: 100%; height: 8px; background: var(--surface2); border-radius: 4px; margin: 8px 0; overflow: hidden; }
+  .rate-bar { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .rate-num { font-size: 1.4rem; font-weight: 700; }
+  .rate-label { font-size: 0.7rem; color: var(--muted); }
+
+  /* 캘린더 히트맵 */
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-nav { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .cal-nav:hover { color: var(--text); }
+  .cal-month { font-size: 0.9rem; font-weight: 600; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-label { text-align: center; font-size: 0.65rem; color: var(--muted); padding: 4px 0; }
+  .cal-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--muted); position: relative; }
+  .cal-cell.empty { background: none; }
+  .cal-cell.future { background: var(--surface2); opacity: 0.3; }
+  .cal-cell.none { background: var(--surface2); }
+  .cal-cell.success { background: #34d39940; color: var(--success); }
+  .cal-cell.late { background: #fbbf2440; color: var(--late); }
+  .cal-cell.fail { background: #f8717140; color: var(--fail); }
+  .cal-cell.today { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+  .cal-member-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .cal-member-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-family: inherit; font-size: 0.78rem; }
+  .cal-member-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* 오프라인 배너 */
+  .offline { text-align: center; padding: 12px; background: #f8717120; border-radius: 12px; margin-bottom: 16px; color: var(--fail); font-size: 0.82rem; }
+
+  .legend { display: flex; gap: 12px; justify-content: center; margin-top: 12px; font-size: 0.68rem; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MIRACLE MORNING</h1>
+    <p class="subtitle">기상 인증 대시보드</p>
+  </header>
+
+  <div class="clock" id="clock">--:--:--</div>
+  <div class="date-label" id="dateLabel">----년 --월 --일</div>
+
+  <div id="offlineBanner" class="offline" style="display:none">봇 미연결 — <code>npm start</code>로 봇을 실행하세요</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="today">오늘</button>
+    <button class="tab-btn" data-tab="calendar">캘린더</button>
+    <button class="tab-btn" data-tab="stats">통계</button>
+  </div>
+
+  <!-- 오늘 탭 -->
+  <div class="tab-content active" id="tab-today">
+    <div class="card">
+      <div class="card-title">오늘 현황</div>
+      <div id="todayStatus">로딩 중...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">연속 스트릭</div>
+      <div class="streak-box" id="streakBox">
+        <div class="streak-item"><div class="streak-fire">🔥</div><div class="streak-num">-</div><div class="streak-label">JJ박</div></div>
+        <div class="streak-item"><div class="streak-fire">🔥</div><div class="streak-num">-</div><div class="streak-label">리안</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 캘린더 탭 -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="card">
+      <div class="cal-member-tabs" id="calMemberTabs"></div>
+      <div class="cal-header">
+        <button class="cal-nav" id="calPrev">&lt;</button>
+        <span class="cal-month" id="calMonth">2026년 4월</span>
+        <button class="cal-nav" id="calNext">&gt;</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:var(--success)"></span>성공</span>
+        <span><span class="legend-dot" style="background:var(--late)"></span>지각</span>
+        <span><span class="legend-dot" style="background:var(--fail)"></span>실패</span>
+        <span><span class="legend-dot" style="background:var(--surface2)"></span>미기록</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 통계 탭 -->
+  <div class="tab-content" id="tab-stats">
+    <div class="card">
+      <div class="card-title">이번 달 달성률</div>
+      <div class="rate-box" id="rateBox"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">전체 기록</div>
+      <div id="allStats"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3737';
+let allData = null;
+let members = [];
+let calYear, calMonth, calMember;
+
+// ─── 시계 ───
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('ko-KR', { hour12: false });
+  const opts = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+  document.getElementById('dateLabel').textContent = now.toLocaleDateString('ko-KR', opts);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── 탭 ───
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── 데이터 로드 ───
+async function loadData() {
+  try {
+    const res = await fetch(API + '/api/data');
+    const json = await res.json();
+    allData = json.records;
+    members = json.members;
+    document.getElementById('offlineBanner').style.display = 'none';
+    renderAll();
+  } catch {
+    document.getElementById('offlineBanner').style.display = 'block';
+    loadDemoData();
+  }
+}
+
+function loadDemoData() {
+  members = [
+    { id: 'jjpark', name: 'JJ박', targetTime: '05:30' },
+    { id: 'rian', name: '리안', targetTime: '07:00' }
+  ];
+  allData = {};
+  renderAll();
+}
+
+// ─── 렌더링 ───
+function renderAll() {
+  renderToday();
+  renderStreaks();
+  initCalendar();
+  renderStats();
+}
+
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE');
+}
+
+function statusIcon(s) {
+  return s === 'success' ? '✅' : s === 'late' ? '⚠️' : s === 'fail' ? '❌' : '⏳';
+}
+
+function statusClass(s) {
+  return s === 'success' ? 'status-success' : s === 'late' ? 'status-late' : s === 'fail' ? 'status-fail' : 'status-pending';
+}
+
+function statusText(s) {
+  return s === 'success' ? '성공' : s === 'late' ? '지각' : s === 'fail' ? '실패' : '대기중';
+}
+
+function renderToday() {
+  const today = todayStr();
+  const box = document.getElementById('todayStatus');
+  box.innerHTML = '';
+  for (const m of members) {
+    const r = allData[today]?.[m.id];
+    const status = r?.status || 'pending';
+    const time = r?.verifiedAt ? new Date(r.verifiedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '';
+    box.innerHTML += `
+      <div class="today-row">
+        <div class="today-icon">${statusIcon(status)}</div>
+        <div class="today-info">
+          <div class="today-name">${m.name}</div>
+          <div class="today-detail">목표 ${m.targetTime}${time ? ' · 인증 ' + time : ''}</div>
+        </div>
+        <span class="today-status ${statusClass(status)}">${statusText(status)}</span>
+      </div>`;
+  }
+}
+
+function renderStreaks() {
+  const box = document.getElementById('streakBox');
+  box.innerHTML = '';
+  for (const m of members) {
+    const streak = calcStreak(m.id);
+    box.innerHTML += `
+      <div class="streak-item">
+        <div class="streak-fire">${streak >= 7 ? '🔥' : streak >= 3 ? '✨' : '💤'}</div>
+        <div class="streak-num">${streak}</div>
+        <div class="streak-label">${m.name}</div>
+      </div>`;
+  }
+}
+
+function calcStreak(memberId) {
+  let streak = 0;
+  const now = new Date();
+  for (let i = 1; i <= 365; i++) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const ds = d.toLocaleDateString('sv-SE');
+    const r = allData[ds]?.[memberId];
+    if (r && (r.status === 'success' || r.status === 'late')) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ─── 캘린더 ───
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  calMember = members[0]?.id || 'jjpark';
+
+  const tabs = document.getElementById('calMemberTabs');
+  tabs.innerHTML = '';
+  for (const m of members) {
+    const btn = document.createElement('button');
+    btn.className = 'cal-member-btn' + (m.id === calMember ? ' active' : '');
+    btn.textContent = m.name;
+    btn.onclick = () => { calMember = m.id; tabs.querySelectorAll('.cal-member-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderCalendar(); };
+    tabs.appendChild(btn);
+  }
+
+  document.getElementById('calPrev').onclick = () => { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); };
+  document.getElementById('calNext').onclick = () => { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); };
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calMonth').textContent = `${calYear}년 ${calMonth + 1}월`;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  for (const l of dayLabels) grid.innerHTML += `<div class="cal-day-label">${l}</div>`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const todayD = todayStr();
+
+  for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="cal-cell empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const r = allData[ds]?.[calMember];
+    const isToday = ds === todayD;
+    const isFuture = new Date(ds) > new Date();
+    let cls = 'none';
+    if (isFuture) cls = 'future';
+    else if (r) cls = r.status;
+    grid.innerHTML += `<div class="cal-cell ${cls}${isToday ? ' today' : ''}">${d}</div>`;
+  }
+}
+
+// ─── 통계 ───
+function renderStats() {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const todayDate = now.getDate();
+  const elapsed = Math.min(todayDate, daysInMonth);
+
+  const rateBox = document.getElementById('rateBox');
+  rateBox.innerHTML = '';
+
+  for (const mb of members) {
+    let success = 0, late = 0, fail = 0;
+    for (let d = 1; d <= elapsed; d++) {
+      const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const r = allData[ds]?.[mb.id];
+      if (r?.status === 'success') success++;
+      else if (r?.status === 'late') late++;
+      else if (r?.status === 'fail') fail++;
+    }
+    const rate = elapsed > 0 ? Math.round(((success + late) / elapsed) * 100) : 0;
+    const color = rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--late)' : 'var(--fail)';
+    rateBox.innerHTML += `
+      <div class="rate-item">
+        <div class="rate-label">${mb.name}</div>
+        <div class="rate-num" style="color:${color}">${rate}%</div>
+        <div class="rate-bar-bg"><div class="rate-bar" style="width:${rate}%;background:${color}"></div></div>
+        <div class="rate-label">${success}성공 ${late}지각 ${fail}실패 / ${elapsed}일</div>
+      </div>`;
+  }
+
+  // 전체 기록
+  const allStats = document.getElementById('allStats');
+  let totalDays = 0;
+  const memberStats = {};
+  for (const mb of members) memberStats[mb.id] = { success: 0, late: 0, fail: 0 };
+
+  for (const [date, records] of Object.entries(allData)) {
+    totalDays++;
+    for (const mb of members) {
+      const r = records[mb.id];
+      if (r?.status === 'success') memberStats[mb.id].success++;
+      else if (r?.status === 'late') memberStats[mb.id].late++;
+      else if (r?.status === 'fail') memberStats[mb.id].fail++;
+    }
+  }
+
+  let html = `<div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">총 ${totalDays}일 기록</div>`;
+  for (const mb of members) {
+    const s = memberStats[mb.id];
+    const total = s.success + s.late + s.fail;
+    const rate = total > 0 ? Math.round(((s.success + s.late) / total) * 100) : 0;
+    html += `<div style="margin-bottom:8px"><strong>${mb.name}</strong> — 전체 ${rate}% (${s.success}성공 ${s.late}지각 ${s.fail}실패)</div>`;
+  }
+  allStats.innerHTML = html;
+}
+
+// ─── 자동 새로고침 ───
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
