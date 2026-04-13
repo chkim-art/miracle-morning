@@ -12,8 +12,8 @@ const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 // 참가자 설정
 const MEMBERS = [
-  { id: 'jjpark', name: 'JJ박', targetTime: '05:30', codeTime: '05:20', reminderTime: '05:30', deadline: '05:40' },
-  { id: 'rian', name: '리안', targetTime: '07:00', codeTime: '06:50', reminderTime: '07:00', deadline: '07:10' }
+  { id: 'jjpark', name: 'JJ박', targetTime: '05:30', codeTime: '05:20', reminderTime: '05:40', deadline: '05:50' },
+  { id: 'rian', name: '리안', targetTime: '07:00', codeTime: '06:50', reminderTime: '07:10', deadline: '07:20' }
 ];
 
 // ─── 유틸 ───

@@ -10,8 +10,8 @@ const TARGET = process.argv[2]; // 'jjpark' or 'rian'
 const DATA_DIR = path.join(__dirname, 'data');
 
 const MEMBERS = {
-  jjpark: { name: 'JJ박', deadline: '05:40' },
-  rian: { name: '리안', deadline: '07:10' }
+  jjpark: { name: 'JJ박', deadline: '05:50' },
+  rian: { name: '리안', deadline: '07:20' }
 };
 
 function generateCode() {
