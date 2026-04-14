@@ -25,6 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 1
+
+      - name: Pull latest data
+        run: git pull --rebase origin master || true
 
       - uses: actions/setup-node@v4
         with:

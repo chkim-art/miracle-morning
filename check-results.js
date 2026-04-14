@@ -75,6 +75,9 @@ async function main() {
       if (!msg || !msg.text || String(msg.chat.id) !== String(CHAT_ID)) continue;
 
       const text = msg.text.trim();
+      const msgTime = new Date(msg.date * 1000);
+      const msgKST = new Date(msgTime.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+      const msgMin = msgKST.getHours() * 60 + msgKST.getMinutes();
 
       // 5글자 코드 매칭
       if (/^[A-Za-z0-9]{5}$/.test(text)) {
@@ -82,8 +85,8 @@ async function main() {
           const record = data[today]?.[member.id];
           if (record && record.status === 'pending' && record.code === text) {
             const codeMin = timeToMinutes(member.codeTime);
-            const diff = nowMin - codeMin;
-            record.verifiedAt = new Date().toISOString();
+            const diff = msgMin - codeMin;
+            record.verifiedAt = msgTime.toISOString();
             record.status = diff <= 20 ? 'success' : 'late';
             saveData(data);
 
@@ -127,8 +130,8 @@ async function main() {
       console.log(`${member.name}: 리마인더 발송`);
     }
 
-    // 마감 처리 (±2분 윈도우)
-    if (Math.abs(nowMin - deadlineMin) <= 2) {
+    // 마감 처리 (±2분 윈도우) — 이미 인증된 건은 건드리지 않음
+    if (Math.abs(nowMin - deadlineMin) <= 2 && record.status === 'pending') {
       record.status = 'fail';
       record.failedAt = new Date().toISOString();
       saveData(data);
