@@ -74,7 +74,8 @@ async function main() {
       const msg = update.message;
       if (!msg || !msg.text || String(msg.chat.id) !== String(CHAT_ID)) continue;
 
-      const text = msg.text.trim();
+      // 봇 멘션(@xxx) 제거 후 코드 추출
+      const text = msg.text.trim().replace(/@\S+\s*/g, '').trim();
       const msgTime = new Date(msg.date * 1000);
       const msgKST = new Date(msgTime.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
       const msgMin = msgKST.getHours() * 60 + msgKST.getMinutes();
