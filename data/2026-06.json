@@ -8,9 +8,10 @@
   },
   "2026-06-10": {
     "rian": {
-      "status": "pending",
+      "status": "success",
       "code": "qH4jg",
-      "sentAt": "2026-06-09T21:48:11.475Z"
+      "sentAt": "2026-06-09T21:48:11.475Z",
+      "verifiedAt": "2026-06-09T21:51:34.000Z"
     }
   }
 }
