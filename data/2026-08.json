@@ -10,7 +10,8 @@
     "jjpark": {
       "status": "pending",
       "code": "qfKBf",
-      "sentAt": "2026-08-15T20:22:42.958Z"
+      "sentAt": "2026-08-15T20:22:42.958Z",
+      "reminded": true
     }
   }
 }
