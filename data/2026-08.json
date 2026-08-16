@@ -19,5 +19,12 @@
       "sentAt": "2026-08-15T21:50:22.979Z",
       "reminded": true
     }
+  },
+  "2026-08-17": {
+    "jjpark": {
+      "status": "pending",
+      "code": "QGjjN",
+      "sentAt": "2026-08-16T20:22:34.497Z"
+    }
   }
 }
